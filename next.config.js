@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: './src/app', // 👈 tell Next.js exactly where the app dir lives
-  },
   images: {
     remotePatterns: [
       {
@@ -12,7 +9,7 @@ const nextConfig = {
     ],
   },
   serverExternalPackages: ['mongoose', 'firebase-admin'],
-  output: 'standalone',
+  // 🚫 Remove output: 'standalone'
 };
 
 module.exports = nextConfig;
