@@ -1,19 +1,29 @@
-import admin from 'firebase-admin';
+// lib/firebase/admin.js
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      }),
-    });
-    console.log('Firebase Admin initialized successfully');
-  } catch (error) {
-    console.error('Firebase admin initialization error:', error);
+let adminAuth = null;
+
+try {
+  if (!process.env.FB_SERVICE_KEY) {
+    throw new Error("FB_SERVICE_KEY environment variable is not set.");
   }
+  
+  const decodedKey = Buffer.from(process.env.FB_SERVICE_KEY, "base64").toString("utf8");
+  const serviceAccount = JSON.parse(decodedKey);
+  
+  const app = initializeApp({
+    credential: cert(serviceAccount),
+  });
+  
+  adminAuth = getAuth(app);
+  console.log("Firebase Admin SDK initialized successfully.");
+} catch (error) {
+  console.error(
+    "Failed to initialize Firebase Admin SDK. Check FB_SERVICE_KEY in .env:",
+    error.message
+  );
+  // Don't exit process in client code, just log error
 }
 
-export const adminAuth = admin.auth();
-export default admin;
+export { adminAuth };

@@ -1,8 +1,7 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getStorage } from 'firebase/storage';
+// lib/firebase/config.js
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 
-// Client-side Firebase config
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -12,13 +11,17 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase only if all config values are present
+let app;
+let auth;
 
-// Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(app);
+const isConfigValid = Object.values(firebaseConfig).every(value => value);
 
-// Initialize Cloud Storage and get a reference to the service
-export const storage = getStorage(app);
+if (isConfigValid) {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+} else {
+  console.warn('Firebase configuration is incomplete. Client-side auth may not work.');
+}
 
-export default app;
+export { app, auth };
