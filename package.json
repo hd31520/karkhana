@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint"
   },
+  
   "dependencies": {
     "eslint-config-next": "^16.0.1",
     "firebase": "^12.5.0",
