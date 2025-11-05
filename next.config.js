@@ -9,7 +9,6 @@ const nextConfig = {
     ],
   },
   serverExternalPackages: ['mongoose', 'firebase-admin'],
-  // 🚫 Remove output: 'standalone'
 };
 
 module.exports = nextConfig;
