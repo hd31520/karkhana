@@ -8,14 +8,8 @@ const nextConfig = {
       },
     ],
   },
-  // Remove all complex features for now
-  trailingSlash: true,
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-}
+  serverExternalPackages: ['mongoose', 'firebase-admin'],
+  output: 'standalone',
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
