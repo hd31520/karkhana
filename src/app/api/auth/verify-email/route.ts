@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/database';
 import User from '@/models/User';
+import { sendWelcomeEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,8 +33,19 @@ export async function POST(request: NextRequest) {
     user.emailVerificationExpires = undefined;
     await user.save();
 
+    // Send welcome email
+    const emailResult = await sendWelcomeEmail(user.email, user.name);
+
+    if (!emailResult.success) {
+      console.error('Failed to send welcome email:', emailResult.error);
+      // Still return success but log the error
+    }
+
     return NextResponse.json(
-      { message: 'Email verified successfully' },
+      { 
+        message: 'Email verified successfully',
+        welcomeEmailSent: emailResult.success
+      },
       { status: 200 }
     );
 

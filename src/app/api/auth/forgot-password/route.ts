@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/database';
 import User from '@/models/User';
 import crypto from 'crypto';
+import { sendPasswordResetEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,11 +35,19 @@ export async function POST(request: NextRequest) {
     user.resetPasswordExpires = resetPasswordExpires;
     await user.save();
 
-    // In a real app, send email here
-    console.log('Reset token:', resetToken);
+    // Send reset email
+    const emailResult = await sendPasswordResetEmail(email, resetToken);
+
+    if (!emailResult.success) {
+      console.error('Failed to send password reset email:', emailResult.error);
+      // Still return success but log the error
+    }
 
     return NextResponse.json(
-      { message: 'If the email exists, a reset link has been sent.' },
+      { 
+        message: 'If the email exists, a reset link has been sent.',
+        emailSent: emailResult.success
+      },
       { status: 200 }
     );
 

@@ -1,16 +1,11 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "./providers";
 
-// Configure Inter font with local fallback
-const inter = Inter({
-  subsets: ["latin"],
-  display: 'swap',
-  variable: '--font-inter',
-  preload: true,
-  fallback: ['system-ui', 'arial'],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Karkhana.shop - Your Product Marketplace",
@@ -23,10 +18,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="font-sans">
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
         <AuthProvider>
-          {children}
+          <ThemeProvider defaultTheme="system" storageKey="karkhana-theme">
+            {children}
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

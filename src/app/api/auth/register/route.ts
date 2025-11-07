@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/database';
 import User from '@/models/User';
 import crypto from 'crypto';
+import { sendVerificationEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,8 +46,13 @@ export async function POST(request: NextRequest) {
       emailVerificationExpires,
     });
 
-    // In a real app, send verification email here
-    console.log('Verification token:', emailVerificationToken);
+    // Send verification email
+    const emailResult = await sendVerificationEmail(email, emailVerificationToken);
+
+    if (!emailResult.success) {
+      console.error('Failed to send verification email:', emailResult.error);
+      // Still return success but log the error
+    }
 
     // Return user without password
     const userResponse = {
@@ -63,7 +69,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         message: 'User registered successfully. Please check your email for verification.',
-        user: userResponse 
+        user: userResponse,
+        emailSent: emailResult.success
       },
       { status: 201 }
     );
