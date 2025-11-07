@@ -2,15 +2,12 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Use Resend's default domain for development
-const FROM_EMAIL = 'onboarding@resend.dev';
-
 export async function sendVerificationEmail(email: string, token: string) {
   const verificationUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}`;
 
   try {
     const { data, error } = await resend.emails.send({
-      from: `Karkhana.shop <${FROM_EMAIL}>`,
+      from: 'Karkhana.shop <noreply@karkhana.shop>',
       to: email,
       subject: 'Verify your email - Karkhana.shop',
       html: `
@@ -44,8 +41,6 @@ export async function sendVerificationEmail(email: string, token: string) {
                 ${verificationUrl}
               </p>
 
-              <p><strong>Verification Token:</strong> ${token}</p>
-
               <p>This verification link will expire in 24 hours.</p>
               <p>If you didn't create an account with Karkhana.shop, please ignore this email.</p>
             </div>
@@ -76,7 +71,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: `Karkhana.shop <${FROM_EMAIL}>`,
+      from: 'Karkhana.shop <noreply@karkhana.shop>',
       to: email,
       subject: 'Reset your password - Karkhana.shop',
       html: `
@@ -111,8 +106,6 @@ export async function sendPasswordResetEmail(email: string, token: string) {
                 ${resetUrl}
               </p>
 
-              <p><strong>Reset Token:</strong> ${token}</p>
-
               <div class="warning">
                 <p><strong>Important:</strong> This link will expire in 1 hour for security reasons.</p>
                 <p>If you didn't request a password reset, please ignore this email and your password will remain unchanged.</p>
@@ -143,7 +136,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 export async function sendWelcomeEmail(email: string, name: string) {
   try {
     const { data, error } = await resend.emails.send({
-      from: `Karkhana.shop <${FROM_EMAIL}>`,
+      from: 'Karkhana.shop <noreply@karkhana.shop>',
       to: email,
       subject: 'Welcome to Karkhana.shop! 🎉',
       html: `
