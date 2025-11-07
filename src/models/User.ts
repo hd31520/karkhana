@@ -1,7 +1,27 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-const userSchema = new mongoose.Schema({
+// Define interface for User document
+export interface IUser extends mongoose.Document {
+  _id: mongoose.Types.ObjectId;
+  email: string;
+  name: string;
+  password: string;
+  role: 'admin' | 'moderator' | 'user';
+  image?: string;
+  emailVerified: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
+  isActive: boolean;
+  lastLogin?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
+}
+
+const userSchema = new mongoose.Schema<IUser>({
   email: {
     type: String,
     required: [true, 'Email is required'],
@@ -63,4 +83,7 @@ userSchema.methods.comparePassword = async function(candidatePassword: string): 
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-export default mongoose.models.User || mongoose.model('User', userSchema);
+// Create and export the model
+const User = mongoose.models.User as mongoose.Model<IUser> || mongoose.model<IUser>('User', userSchema);
+
+export default User;
