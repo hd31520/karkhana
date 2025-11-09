@@ -1,9 +1,10 @@
 // src/app/api/salaries/mine/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/database';
-import { Salary } from '@/models/Salary';
+// import { Salary } from 'src/models/Salary';
 import mongoose from 'mongoose';
 import { getUserIdFromReq } from '@/lib/auth';
+import { Salary } from '@/models/Salary';
 
 export async function GET(req: NextRequest) {
   try {
