@@ -1,92 +1,126 @@
 // src/app/api/products/[id]/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/database';
-// import Product from '@/models/Product'; // default export is typical; change if yours exports differently
-import mongoose from 'mongoose';
-import { getUserIdFromReq } from '@/lib/auth';
-import { Product } from '@/models/Product';
+import { NextResponse } from 'next/server'
+import { connectToDatabase } from '@/lib/database'
+// import Product from '@/models/Product'
+import mongoose from 'mongoose'
+import { Product } from '@/models/Product'
 
-type ParamsOrPromise = { id: string } | Promise<{ id: string }>;
+/**
+ * Handles single product operations
+ * GET  /api/products/:id     → Fetch single product (by id or slug)
+ * PUT  /api/products/:id     → Update product (requires actorId or actorRole)
+ * DELETE /api/products/:id   → Delete product (requires actorId or actorRole)
+ */
 
-/** Utility to safely unwrap params whether sync or Promise (fixes build-time validator mismatch). */
-async function getIdFromParams(params: ParamsOrPromise) {
-  const resolved = await Promise.resolve(params);
-  return resolved.id;
+async function findByIdOrSlug(id: string) {
+  // Try finding by SEO slug first
+  let product = await Product.findOne({ 'seo.slug': id }).lean()
+  if (!product && mongoose.Types.ObjectId.isValid(id)) {
+    product = await Product.findById(id).lean()
+  }
+  return product
 }
 
-export async function GET(_req: NextRequest, { params }: { params: ParamsOrPromise }) {
+// 🟢 GET PRODUCT DETAILS
+export async function GET(_req: Request, { params }: { params: { id: string } }) {
   try {
-    await connectToDatabase();
-
-    const id = await getIdFromParams(params);
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: 'Invalid id' }, { status: 400 });
+    await connectToDatabase()
+    const { id } = params
+    const product = await findByIdOrSlug(id)
+    if (!product) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
-
-    const p = await Product.findById(id).lean();
-    if (!p) return NextResponse.json({ message: 'Not found' }, { status: 404 });
-
-    return NextResponse.json(p);
-  } catch (err: any) {
-    console.error(err);
-    return NextResponse.json({ message: err?.message || 'Error' }, { status: 500 });
+    return NextResponse.json({ product })
+  } catch (err) {
+    console.error('GET /api/products/:id error:', err)
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: ParamsOrPromise }) {
+// 🟡 UPDATE PRODUCT
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
-    await connectToDatabase();
+    await connectToDatabase()
+    const { id } = params
+    const payload = await req.json()
+    const { actorId, actorRole, ...updates } = payload
 
-    const userId = await getUserIdFromReq(req);
-    if (!userId) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    const productDoc =
+      (await Product.findOne({ 'seo.slug': id })) ||
+      (mongoose.Types.ObjectId.isValid(id) ? await Product.findById(id) : null)
 
-    const id = await getIdFromParams(params);
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: 'Invalid id' }, { status: 400 });
+    if (!productDoc) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
 
-    const body = await req.json();
+    // Simple permission check (replace later with real auth)
+    const ownerId = productDoc.userId?.toString?.()
+    const isOwner = actorId && ownerId && actorId === ownerId
+    const isAdmin = actorRole === 'admin' || actorRole === 'superadmin'
 
-    const product = await Product.findById(id);
-    if (!product) return NextResponse.json({ message: 'Not found' }, { status: 404 });
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 })
+    }
 
-    // Ensure owner
-    if (product.userId.toString() !== userId) return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    // Apply only allowed fields
+    const allowedFields = [
+      'title',
+      'description',
+      'price',
+      'images',
+      'category',
+      'status',
+      'paymentStatus',
+      'featured',
+      'seo',
+    ]
 
-    // Apply allowed updates only (optional): you can restrict fields here
-    Object.assign(product, body);
-    await product.save();
+    for (const key of allowedFields) {
+      if (key in updates) {
+        // @ts-ignore dynamic assignment
+        productDoc[key] = updates[key]
+      }
+    }
 
-    // Return a plain JS object (serializable)
-    const updated = await Product.findById(id).lean();
-    return NextResponse.json(updated);
-  } catch (err: any) {
-    console.error(err);
-    return NextResponse.json({ message: err?.message || 'Error' }, { status: 500 });
+    await productDoc.save()
+
+    return NextResponse.json({ success: true, product: productDoc })
+  } catch (err) {
+    console.error('PUT /api/products/:id error:', err)
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: ParamsOrPromise }) {
+// 🔴 DELETE PRODUCT
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
-    await connectToDatabase();
+    await connectToDatabase()
+    const { id } = params
+    const body = await req.json().catch(() => ({}))
+    const { actorId, actorRole } = body
 
-    const userId = await getUserIdFromReq(req);
-    if (!userId) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    const productDoc =
+      (await Product.findOne({ 'seo.slug': id })) ||
+      (mongoose.Types.ObjectId.isValid(id) ? await Product.findById(id) : null)
 
-    const id = await getIdFromParams(params);
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: 'Invalid id' }, { status: 400 });
+    if (!productDoc) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
 
-    const product = await Product.findById(id);
-    if (!product) return NextResponse.json({ message: 'Not found' }, { status: 404 });
+    const ownerId = productDoc.userId?.toString?.()
+    const isOwner = actorId && ownerId && actorId === ownerId
+    const isAdmin = actorRole === 'admin' || actorRole === 'superadmin'
 
-    if (product.userId.toString() !== userId) return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 })
+    }
 
-    await Product.findByIdAndDelete(id);
-    return NextResponse.json({ message: 'Deleted' });
-  } catch (err: any) {
-    console.error(err);
-    return NextResponse.json({ message: err?.message || 'Error' }, { status: 500 });
+    // ✅ deleteOne() is the correct replacement for remove()
+    await productDoc.deleteOne()
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error('DELETE /api/products/:id error:', err)
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
