@@ -1,35 +1,41 @@
 // src/app/api/products/[id]/route.ts
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { connectToDatabase } from '@/lib/database'
 // import Product from '@/models/Product'
 import mongoose from 'mongoose'
 import { Product } from '@/models/Product'
 
 /**
- * Handles single product operations
- * GET  /api/products/:id     → Fetch single product (by id or slug)
- * PUT  /api/products/:id     → Update product (requires actorId or actorRole)
- * DELETE /api/products/:id   → Delete product (requires actorId or actorRole)
+ * Route handlers for /api/products/:id
+ *
+ * NOTE: context.params may be a Promise<{ id: string }>, so we `await` it.
  */
 
-async function findByIdOrSlug(id: string) {
-  // Try finding by SEO slug first
-  let product = await Product.findOne({ 'seo.slug': id }).lean()
-  if (!product && mongoose.Types.ObjectId.isValid(id)) {
-    product = await Product.findById(id).lean()
-  }
-  return product
+// helper to get id from context (handles Promise or plain)
+async function resolveId(context: { params: any }) {
+  const params = await Promise.resolve(context.params)
+  return params?.id as string | undefined
 }
 
-// 🟢 GET PRODUCT DETAILS
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+// GET -> returns plain object (lean)
+export async function GET(
+  _request: NextRequest,
+  context: { params: { id: string } | Promise<{ id: string }> }
+) {
   try {
+    const id = await resolveId(context)
+    if (!id) return NextResponse.json({ error: 'Missing id param' }, { status: 400 })
+
     await connectToDatabase()
-    const { id } = params
-    const product = await findByIdOrSlug(id)
-    if (!product) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+
+    // try find by seo.slug first, then by ObjectId
+    let product = await Product.findOne({ 'seo.slug': id }).lean()
+    if (!product && mongoose.Types.ObjectId.isValid(id)) {
+      product = await Product.findById(id).lean()
     }
+
+    if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+
     return NextResponse.json({ product })
   } catch (err) {
     console.error('GET /api/products/:id error:', err)
@@ -37,23 +43,28 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   }
 }
 
-// 🟡 UPDATE PRODUCT
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+// PUT -> update allowed fields; requires actorId/actorRole in body (or integrate auth)
+export async function PUT(
+  request: NextRequest,
+  context: { params: { id: string } | Promise<{ id: string }> }
+) {
   try {
+    const id = await resolveId(context)
+    if (!id) return NextResponse.json({ error: 'Missing id param' }, { status: 400 })
+
     await connectToDatabase()
-    const { id } = params
-    const payload = await req.json()
+
+    const payload = await request.json().catch(() => ({}))
     const { actorId, actorRole, ...updates } = payload
 
+    // find document (non-lean) so we can save
     const productDoc =
       (await Product.findOne({ 'seo.slug': id })) ||
       (mongoose.Types.ObjectId.isValid(id) ? await Product.findById(id) : null)
 
-    if (!productDoc) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
-    }
+    if (!productDoc) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
 
-    // Simple permission check (replace later with real auth)
+    // authorization check (simple placeholder)
     const ownerId = productDoc.userId?.toString?.()
     const isOwner = actorId && ownerId && actorId === ownerId
     const isAdmin = actorRole === 'admin' || actorRole === 'superadmin'
@@ -62,7 +73,6 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 })
     }
 
-    // Apply only allowed fields
     const allowedFields = [
       'title',
       'description',
@@ -73,10 +83,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       'paymentStatus',
       'featured',
       'seo',
-    ]
+    ] as const
 
     for (const key of allowedFields) {
-      if (key in updates) {
+      if (Object.prototype.hasOwnProperty.call(updates, key)) {
         // @ts-ignore dynamic assignment
         productDoc[key] = updates[key]
       }
@@ -84,28 +94,34 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
     await productDoc.save()
 
-    return NextResponse.json({ success: true, product: productDoc })
+    // return updated product (lean-like)
+    const updated = await Product.findById(productDoc._id).lean()
+    return NextResponse.json({ success: true, product: updated })
   } catch (err) {
     console.error('PUT /api/products/:id error:', err)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
 
-// 🔴 DELETE PRODUCT
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+// DELETE -> delete product document; requires actorId/actorRole in body
+export async function DELETE(
+  request: NextRequest,
+  context: { params: { id: string } | Promise<{ id: string }> }
+) {
   try {
+    const id = await resolveId(context)
+    if (!id) return NextResponse.json({ error: 'Missing id param' }, { status: 400 })
+
     await connectToDatabase()
-    const { id } = params
-    const body = await req.json().catch(() => ({}))
+
+    const body = await request.json().catch(() => ({}))
     const { actorId, actorRole } = body
 
     const productDoc =
       (await Product.findOne({ 'seo.slug': id })) ||
       (mongoose.Types.ObjectId.isValid(id) ? await Product.findById(id) : null)
 
-    if (!productDoc) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
-    }
+    if (!productDoc) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
 
     const ownerId = productDoc.userId?.toString?.()
     const isOwner = actorId && ownerId && actorId === ownerId
@@ -115,7 +131,6 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 })
     }
 
-    // ✅ deleteOne() is the correct replacement for remove()
     await productDoc.deleteOne()
 
     return NextResponse.json({ success: true })
