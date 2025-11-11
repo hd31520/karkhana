@@ -1,4 +1,3 @@
-// src/components/shared/Navbar.tsx
 'use client'
 
 import React, { useState } from 'react'
@@ -9,7 +8,6 @@ import { Menu, X } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { useAuth } from '@/contexts/auth-context'
-// import { useAuth } from '@/contexts/auth-context'
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -25,7 +23,7 @@ export default function Navbar() {
   ]
 
   return (
-    <header className="bg-white border-b sticky top-0 z-40">
+    <header className="bg-white border-b sticky top-0 z-40 dark:bg-gray-900 dark:border-gray-700 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Brand */}
@@ -34,7 +32,7 @@ export default function Navbar() {
               <div className="h-9 w-9 rounded-md bg-emerald-600 flex items-center justify-center text-white font-bold">
                 K
               </div>
-              <span className="font-semibold text-lg">Karkhana.shop</span>
+              <span className="font-semibold text-lg dark:text-white">Hridoy.shop</span>
             </Link>
           </div>
 
@@ -45,7 +43,9 @@ export default function Navbar() {
                 key={n.href}
                 href={n.href}
                 className={`text-sm font-medium ${
-                  pathname === n.href ? 'text-emerald-600' : 'text-gray-700 hover:text-emerald-600'
+                  pathname === n.href
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400'
                 }`}
               >
                 {n.label}
@@ -65,33 +65,41 @@ export default function Navbar() {
                   <div className="relative">
                     <button
                       onClick={() => setProfileOpen((s) => !s)}
-                      className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-gray-50"
+                      className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800"
                       aria-expanded={profileOpen}
                     >
-                      <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
+                      <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                         {user.image ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={user.image} alt={user.name ?? 'avatar'} className="w-full h-full object-cover" />
                         ) : (
-                          <span className="flex items-center justify-center w-full h-full text-gray-600">
+                          <span className="flex items-center justify-center w-full h-full text-gray-600 dark:text-gray-200">
                             {user.name ? user.name[0].toUpperCase() : 'U'}
                           </span>
                         )}
                       </div>
-                      <span className="hidden sm:inline-block text-sm">{user.name}</span>
+                      <span className="hidden sm:inline-block text-sm text-gray-700 dark:text-gray-200">
+                        {user.name}
+                      </span>
                     </button>
 
                     {profileOpen && (
                       <div
-                        className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-md py-1"
+                        className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-md shadow-md py-1"
                         onMouseLeave={() => setProfileOpen(false)}
                       >
-                        <Link href="/dashboard/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        <Link
+                          href="/dashboard/profile"
+                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
                           Profile
                         </Link>
 
                         {user.role === 'admin' && (
-                          <Link href="/admin/users" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                          <Link
+                            href="/admin/users"
+                            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                          >
                             Admin Panel
                           </Link>
                         )}
@@ -101,7 +109,7 @@ export default function Navbar() {
                             setProfileOpen(false)
                             await logout()
                           }}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700"
                         >
                           Logout
                         </button>
@@ -117,19 +125,25 @@ export default function Navbar() {
                   <Link href="/register">
                     <Button size="sm">Sign up</Button>
                   </Link>
-                  <ThemeToggle />
                 </>
               )}
+
+              {/* ✅ Mode switcher (always visible on desktop) */}
+              <ThemeToggle />
             </div>
 
             {/* Mobile menu trigger */}
             <div className="md:hidden flex items-center">
-              <ThemeToggle />
+              {/* ✅ Mode switcher on mobile */}
+              <div className="mr-2">
+                <ThemeToggle />
+              </div>
+
               <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger asChild>
                   <button
                     aria-label="Toggle menu"
-                    className="p-2 rounded-md inline-flex items-center justify-center text-gray-700 hover:bg-gray-100"
+                    className="p-2 rounded-md inline-flex items-center justify-center text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
                   >
                     {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                   </button>
@@ -137,8 +151,12 @@ export default function Navbar() {
                 <SheetContent side="right" className="w-64">
                   <SheetHeader>
                     <div className="flex items-center justify-between w-full">
-                      <SheetTitle>Karkhana</SheetTitle>
-                      <button onClick={() => setIsOpen(false)} aria-label="Close menu" className="p-1 rounded-md hover:bg-gray-100">
+                      <SheetTitle className="dark:text-white">Hridoy</SheetTitle>
+                      <button
+                        onClick={() => setIsOpen(false)}
+                        aria-label="Close menu"
+                        className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                      >
                         <X className="h-5 w-5" />
                       </button>
                     </div>
@@ -151,17 +169,19 @@ export default function Navbar() {
                         href={n.href}
                         onClick={() => setIsOpen(false)}
                         className={`block text-base font-medium px-2 py-2 rounded-md ${
-                          pathname === n.href ? 'text-emerald-600' : 'text-gray-700 hover:text-emerald-600'
+                          pathname === n.href
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400'
                         }`}
                       >
                         {n.label}
                       </Link>
                     ))}
 
-                    <div className="pt-4 border-t">
+                    <div className="pt-4 border-t dark:border-gray-700">
                       {!loading && user ? (
                         <>
-                          <Link href="/dashboard" onClick={() => setIsOpen(false)} className="block text-gray-700">
+                          <Link href="/dashboard" onClick={() => setIsOpen(false)} className="block text-gray-700 dark:text-gray-300">
                             Dashboard
                           </Link>
                           <button
@@ -169,7 +189,7 @@ export default function Navbar() {
                               setIsOpen(false)
                               await logout()
                             }}
-                            className="block text-left w-full text-red-600 mt-2"
+                            className="block text-left w-full text-red-600 dark:text-red-400 mt-2"
                           >
                             Logout
                           </button>
@@ -180,7 +200,9 @@ export default function Navbar() {
                             <Button variant="outline" className="w-full">Login</Button>
                           </Link>
                           <Link href="/register" onClick={() => setIsOpen(false)} className="block w-full mt-2">
-                            <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">Get Started</Button>
+                            <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+                              Get Started
+                            </Button>
                           </Link>
                         </>
                       )}

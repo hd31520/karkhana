@@ -10,7 +10,7 @@ const PrisingCTA = () => {
             Ready to Get Started?
           </h2>
           <p className="text-blue-100 text-xl mb-8 max-w-2xl mx-auto">
-            Join hundreds of manufacturers already growing with Karkhana.shop
+            Join hundreds of manufacturers already growing with Hridoy.shop
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">

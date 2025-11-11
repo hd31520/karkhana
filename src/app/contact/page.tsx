@@ -68,7 +68,7 @@ export default function Contact() {
               <span className="text-blue-600"> Help</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Have questions about Karkhana.shop? Need help with your account?
+              Have questions about Hridoy.shop? Need help with your account?
               Our team is here to help you succeed.
             </p>
           </div>
@@ -92,7 +92,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <div className="font-semibold">Email</div>
-                      <div className="text-gray-600">support@karkhana.shop</div>
+                      <div className="text-gray-600">support@Hridoy.shop</div>
                     </div>
                   </div>
 
