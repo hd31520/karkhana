@@ -18,7 +18,7 @@ const Banner = () => {
             Management Platform
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Hridoy.shop combines e-commerce, workforce management, and analytics 
+            karkhana.shop combines e-commerce, workforce management, and analytics 
             in one powerful platform. Grow your business with professional tools made for manufacturers.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">

@@ -27,7 +27,7 @@ export default function About() {
               <span className="text-blue-600"> Nationwide</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Hridoy.shop was born from a simple vision: to provide
+              karkhana.shop was born from a simple vision: to provide
               small-scale manufacturers and shop owners with the same powerful
               tools that large enterprises use, at a fraction of the cost.
             </p>

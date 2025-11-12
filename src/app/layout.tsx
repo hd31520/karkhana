@@ -9,8 +9,8 @@ import { AuthProvider } from "@/contexts/auth-context";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Hridoy.shop - Your Product Marketplace",
-  description: "Showcase and manage your products with Hridoy.shop",
+  title: "karkhana.shop - Your Product Marketplace",
+  description: "Showcase and manage your products with karkhana.shop",
 };
 
 export default function RootLayout({
@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <AuthProvider>
-          <ThemeProvider defaultTheme="system" storageKey="Hridoy-theme">
+          <ThemeProvider defaultTheme="system" storageKey="karkhana-theme">
             {children}
           </ThemeProvider>
         </AuthProvider>

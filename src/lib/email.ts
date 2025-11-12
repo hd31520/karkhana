@@ -22,9 +22,9 @@ export async function sendVerificationEmail(email: string, token: string) {
   const verificationUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}`;
 
   const mailOptions = {
-    from: `"Hridoy.shop" <${process.env.GMAIL_USER}>`,
+    from: `"karkhana.shop" <${process.env.GMAIL_USER}>`,
     to: email,
-    subject: 'Verify your email - Hridoy.shop',
+    subject: 'Verify your email - karkhana.shop',
     html: `
       <!DOCTYPE html>
       <html>
@@ -42,11 +42,11 @@ export async function sendVerificationEmail(email: string, token: string) {
       <body>
         <div class="container">
           <div class="header">
-            <h1>Welcome to Hridoy.shop! 🎉</h1>
+            <h1>Welcome to karkhana.shop! 🎉</h1>
           </div>
           <div class="content">
             <h2>Verify Your Email Address</h2>
-            <p>Thank you for signing up with Hridoy.shop. To complete your registration and start using your account, please verify your email address by clicking the button below:</p>
+            <p>Thank you for signing up with karkhana.shop. To complete your registration and start using your account, please verify your email address by clicking the button below:</p>
             
             <div style="text-align: center;">
               <a href="${verificationUrl}" class="button">Verify Email Address</a>
@@ -59,10 +59,10 @@ export async function sendVerificationEmail(email: string, token: string) {
             <div class="token">${token}</div>
 
             <p>This verification link will expire in 24 hours.</p>
-            <p>If you didn't create an account with Hridoy.shop, please ignore this email.</p>
+            <p>If you didn't create an account with karkhana.shop, please ignore this email.</p>
           </div>
           <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Hridoy.shop. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} karkhana.shop. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -85,9 +85,9 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
 
   const mailOptions = {
-    from: `"Hridoy.shop" <${process.env.GMAIL_USER}>`,
+    from: `"karkhana.shop" <${process.env.GMAIL_USER}>`,
     to: email,
-    subject: 'Reset your password - Hridoy.shop',
+    subject: 'Reset your password - karkhana.shop',
     html: `
       <!DOCTYPE html>
       <html>
@@ -110,7 +110,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
           </div>
           <div class="content">
             <h2>Reset Your Password</h2>
-            <p>We received a request to reset your password for your Hridoy.shop account. Click the button below to create a new password:</p>
+            <p>We received a request to reset your password for your karkhana.shop account. Click the button below to create a new password:</p>
             
             <div style="text-align: center;">
               <a href="${resetUrl}" class="button">Reset Password</a>
@@ -128,7 +128,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
             </div>
           </div>
           <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Hridoy.shop. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} karkhana.shop. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -149,9 +149,9 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 
 export async function sendWelcomeEmail(email: string, name: string) {
   const mailOptions = {
-    from: `"Hridoy.shop" <${process.env.GMAIL_USER}>`,
+    from: `"karkhana.shop" <${process.env.GMAIL_USER}>`,
     to: email,
-    subject: 'Welcome to Hridoy.shop! 🎉',
+    subject: 'Welcome to karkhana.shop! 🎉',
     html: `
       <!DOCTYPE html>
       <html>
@@ -168,11 +168,11 @@ export async function sendWelcomeEmail(email: string, name: string) {
       <body>
         <div class="container">
           <div class="header">
-            <h1>Welcome to Hridoy.shop! 🎉</h1>
+            <h1>Welcome to karkhana.shop! 🎉</h1>
           </div>
           <div class="content">
             <h2>Hello ${name},</h2>
-            <p>Welcome to Hridoy.shop! We're excited to have you on board. Your account has been successfully verified and you're ready to start using our platform.</p>
+            <p>Welcome to karkhana.shop! We're excited to have you on board. Your account has been successfully verified and you're ready to start using our platform.</p>
             
             <h3>What you can do:</h3>
             <div class="feature">
@@ -199,7 +199,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
             <p>If you have any questions, feel free to reply to this email or contact our support team.</p>
           </div>
           <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Hridoy.shop. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} karkhana.shop. All rights reserved.</p>
           </div>
         </div>
       </body>

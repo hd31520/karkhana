@@ -131,7 +131,7 @@ export default function Features() {
               <span className="text-blue-600"> Succeed</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Hridoy.shop provides a comprehensive suite of tools designed
+              karkhana.shop provides a comprehensive suite of tools designed
               specifically for manufacturers and shop owners. Manage your entire
               business from one platform.
             </p>
@@ -260,7 +260,7 @@ export default function Features() {
                 </h3>
                 <p className="text-gray-600 mb-6">
                   Join hundreds of manufacturers who have transformed their
-                  business operations with Hridoy.shop.
+                  business operations with karkhana.shop.
                 </p>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center text-gray-600">

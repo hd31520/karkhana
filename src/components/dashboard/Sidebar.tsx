@@ -18,7 +18,7 @@ export function Sidebar() {
   return (
     <aside className="w-72 hidden md:block border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
       <div className="p-6">
-        <h1 className="text-xl font-bold text-emerald-600">Hridoy</h1>
+        <h1 className="text-xl font-bold text-emerald-600">karkhana</h1>
         <p className="text-sm text-zinc-500 mt-1">Seller dashboard</p>
 
         <nav className="mt-6 space-y-1">

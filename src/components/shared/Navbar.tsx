@@ -32,7 +32,7 @@ export default function Navbar() {
               <div className="h-9 w-9 rounded-md bg-emerald-600 flex items-center justify-center text-white font-bold">
                 K
               </div>
-              <span className="font-semibold text-lg dark:text-white">Hridoy.shop</span>
+              <span className="font-semibold text-lg dark:text-white">karkhana.shop</span>
             </Link>
           </div>
 
@@ -151,7 +151,7 @@ export default function Navbar() {
                 <SheetContent side="right" className="w-64">
                   <SheetHeader>
                     <div className="flex items-center justify-between w-full">
-                      <SheetTitle className="dark:text-white">Hridoy</SheetTitle>
+                      <SheetTitle className="dark:text-white">karkhana</SheetTitle>
                       <button
                         onClick={() => setIsOpen(false)}
                         aria-label="Close menu"

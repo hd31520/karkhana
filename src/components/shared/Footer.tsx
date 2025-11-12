@@ -16,7 +16,7 @@ export default function PublicFooter() {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">K</span>
               </div>
-              <span className="text-xl font-bold">Hridoy.shop</span>
+              <span className="text-xl font-bold">karkhana.shop</span>
             </div>
             <p className="text-gray-400 mb-6 leading-relaxed">
               Empowering manufacturers with complete business management solutions. 
@@ -87,7 +87,7 @@ export default function PublicFooter() {
             <ul className="space-y-3">
               <li className="flex items-center space-x-3 text-gray-400">
                 <Mail className="h-4 w-4" />
-                <span>support@Hridoy.shop</span>
+                <span>support@karkhana.shop</span>
               </li>
               <li className="flex items-center space-x-3 text-gray-400">
                 <Phone className="h-4 w-4" />
@@ -130,7 +130,7 @@ export default function PublicFooter() {
         <div className="border-t border-gray-800 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm">
-              &copy; 2025 Hridoy.shop. All rights reserved.
+              &copy; 2025 karkhana.shop. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm text-gray-400">
               <Link href="/privacy" className="hover:text-white transition-colors">
