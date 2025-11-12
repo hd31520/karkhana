@@ -153,7 +153,7 @@ export default function CreateProductPage() {
         description: data.description,
         price: priceValue,
         category: data.category,
-        image: imageUrl,
+        images: imageUrl ? [imageUrl] : [],
         userId: userId, // Include the user ID
       }
 

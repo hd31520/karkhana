@@ -236,7 +236,7 @@ export default function EditProductPage() {
         description: data.description.trim(),
         price: priceValue,
         category: data.category.trim(),
-        image: imageUrl ?? null,
+         images: imageUrl ? [imageUrl] : [],
         userId: userId,
       }
 
