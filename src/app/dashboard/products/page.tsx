@@ -22,7 +22,9 @@ export default function MyProductsPage() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-zinc-800 dark:text-zinc-100">My Products</h3>
-        <Link href="/dashboard/products/create"><Button size="sm">Create Product</Button></Link>
+        <Link href="/dashboard/products/create">
+          <Button size="sm">Create Product</Button>
+        </Link>
       </div>
 
       {loading ? (
@@ -42,8 +44,12 @@ export default function MyProductsPage() {
                   <p className="text-sm text-zinc-500">Status: <span className="capitalize">{p.status}</span></p>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Link href={`/dashboard/products/${p._id}`}>
-                    <a className="text-sm text-emerald-600 hover:underline">Manage</a>
+                  {/* Fixed Link - Option 1: Remove the <a> tag */}
+                  <Link 
+                    href={`/dashboard/products/create/${p._id}`}
+                    className="text-sm text-emerald-600 hover:underline"
+                  >
+                    Manage
                   </Link>
                 </div>
               </div>

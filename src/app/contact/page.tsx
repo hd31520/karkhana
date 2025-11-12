@@ -3,6 +3,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import toast from "react-hot-toast";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from "lucide-react";
-import PublicLayout from "@/components/layout/public-layout";
+// import PublicLayout from "@/components/layout/public-layout";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -29,21 +31,40 @@ export default function Contact() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  e.preventDefault();
+  setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+  try {
+    const res = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
 
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Contact submit failed:", data);
+      toast?.error?.(data?.error || "Failed to send message.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // success
     setIsSubmitting(false);
     setIsSubmitted(true);
 
-    // Reset form after 3 seconds
+    // Reset form after a few seconds
     setTimeout(() => {
       setIsSubmitted(false);
       setFormData({ name: "", email: "", subject: "", message: "" });
     }, 3000);
-  };
+  } catch (err) {
+    console.error("Contact submit error:", err);
+    setIsSubmitting(false);
+    toast?.error?.("Unexpected error while sending message.");
+  }
+};
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -57,7 +78,7 @@ export default function Contact() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <PublicLayout>
+      {/* <PublicLayout> */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
             <Badge variant="secondary" className="mb-4 px-4 py-1 text-sm">
@@ -275,7 +296,7 @@ export default function Contact() {
             </div>
           </div>
         </div>
-      </PublicLayout>
+      {/* </PublicLayout> */}
       {/* Hero Section */}
     </div>
   );
