@@ -1,7 +1,7 @@
 // src/app/dashboard/products/create/page.tsx
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useRouter } from 'next/navigation'
 
-// Fixed schema without z.coerce.number()
+// Zod schema (keep price as string in form)
 const schema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
@@ -22,11 +22,13 @@ const schema = z.object({
 })
 
 type FormValues = {
-  title: string;
-  description: string;
-  price: string; // Keep as string in form, convert to number in submit
-  category: string;
+  title: string
+  description: string
+  price: string
+  category: string
 }
+
+type FileWithPreview = { file: File; preview: string; id: string }
 
 export default function CreateProductPage() {
   const router = useRouter()
@@ -39,20 +41,23 @@ export default function CreateProductPage() {
     defaultValues: { title: '', description: '', price: '', category: '' },
   })
 
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [preview, setPreview] = useState<string | null>(null)
+  const [files, setFiles] = useState<FileWithPreview[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null)
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
   const [userId, setUserId] = useState<string | null>(null)
   const [loadingUser, setLoadingUser] = useState(true)
 
-  // Get current user ID
+  // keep track of created preview URLs so we can revoke them on unmount
+  const previewsRef = useRef<string[]>([])
+
+  // Get current user ID (adjust endpoint if your auth/session endpoint differs)
   useEffect(() => {
+    let mounted = true
     async function getCurrentUser() {
       try {
         const res = await fetch('/api/auth/session')
         const session = await res.json()
-        
+        if (!mounted) return
         if (session?.user?.id) {
           setUserId(session.user.id)
         } else {
@@ -62,102 +67,167 @@ export default function CreateProductPage() {
         console.error('Failed to get user session:', err)
         setError('You must be logged in to create products')
       } finally {
-        setLoadingUser(false)
+        if (mounted) setLoadingUser(false)
       }
     }
-
     getCurrentUser()
+    return () => {
+      mounted = false
+    }
   }, [])
 
-  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0] ?? null
-    
-    // Validate file size client-side (5MB max)
-    if (f && f.size > 5 * 1024 * 1024) {
-      setError('File too large. Maximum size is 5MB.')
-      setImageFile(null)
-      setPreview(null)
-      return
+  // robust id generator
+  function makeId() {
+    if (typeof crypto !== 'undefined' && typeof (crypto as any).randomUUID === 'function') {
+      return (crypto as any).randomUUID()
     }
-    
-    // Validate file type client-side
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-    if (f && !allowedTypes.includes(f.type)) {
-      setError('Invalid file type. Allowed: JPEG, PNG, GIF, WebP')
-      setImageFile(null)
-      setPreview(null)
-      return
-    }
-    
-    setImageFile(f)
-    setError(null)
-    if (f) setPreview(URL.createObjectURL(f))
-    else setPreview(null)
+    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`
   }
 
-  async function uploadToImgBB(file: File) {
-    const fd = new FormData()
-    fd.append('image', file)
+  function onFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selected = e.target.files ? Array.from(e.target.files) : []
+    if (selected.length === 0) return
 
-    setUploadProgress(0)
-    
+    // combine existing + new but cap to 4
+    const combinedFileList = [...files.map((f) => f.file), ...selected].slice(0, 4)
+
+    // Validate types & size
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    const invalid = selected.find((f) => !allowedTypes.includes(f.type))
+    if (invalid) {
+      setError('Invalid file type. Allowed: JPEG, PNG, GIF, WebP')
+      return
+    }
+    const tooLarge = selected.find((f) => f.size > 5 * 1024 * 1024)
+    if (tooLarge) {
+      setError('One of the files is too large. Maximum size per file: 5MB.')
+      return
+    }
+
+    // Build FileWithPreview: reuse existing preview/id when file metadata matches, else create new
+    const newFiles: FileWithPreview[] = combinedFileList.map((f) => {
+      const existing = files.find(
+        (x) => x.file.name === f.name && x.file.size === f.size && x.file.lastModified === f.lastModified
+      )
+      if (existing) return existing
+      const preview = URL.createObjectURL(f)
+      previewsRef.current.push(preview)
+      return { file: f, preview, id: makeId() }
+    })
+
+    setError(null)
+    setFiles(newFiles)
+    // reset input value to allow same file selection again
+    e.currentTarget.value = ''
+  }
+
+  function removeFile(id: string) {
+    setFiles((prev) => {
+      const removed = prev.find((f) => f.id === id)
+      if (removed) {
+        try {
+          URL.revokeObjectURL(removed.preview)
+        } catch (e) {
+          // ignore
+        }
+        // also remove from previewsRef
+        previewsRef.current = previewsRef.current.filter((p) => p !== removed.preview)
+      }
+      return prev.filter((f) => f.id !== id)
+    })
+  }
+
+  // revoke any remaining previews on unmount
+  useEffect(() => {
+    return () => {
+      for (const p of previewsRef.current) {
+        try {
+          URL.revokeObjectURL(p)
+        } catch (e) {
+          // ignore
+        }
+      }
+      previewsRef.current = []
+    }
+  }, [])
+
+  // upload single file using existing server upload route (/api/upload)
+  // expects multipart/form-data and returns JSON { url: 'https://...' } on success
+  async function uploadSingle(file: FileWithPreview): Promise<string> {
+    const fd = new FormData()
+    fd.append('image', file.file)
+
     try {
-      const res = await fetch('/api/upload', { 
-        method: 'POST', 
-        body: fd 
+      setUploadProgress((p) => ({ ...p, [file.id]: 5 }))
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: fd,
       })
 
-      setUploadProgress(100)
-      
-      // Parse response
-      const data = await res.json()
-
       if (!res.ok) {
-        // Use the simplified error message from our improved API
-        throw new Error(data.error || data.message || `Upload failed with status ${res.status}`)
+        const txt = await res.text().catch(() => '')
+        throw new Error(txt || `Upload failed (${res.status})`)
       }
 
-      if (!data.url) {
-        throw new Error('No image URL returned from upload service')
+      const json = await res.json()
+      const url = json?.url ?? (Array.isArray(json?.urls) ? json.urls[0] : null)
+      if (!url) {
+        throw new Error(json?.error ?? 'Upload returned no URL')
       }
 
-      return data.url
+      setUploadProgress((p) => ({ ...p, [file.id]: 100 }))
+      // keep a bit of progress indicator before clearing
+      setTimeout(() => {
+        setUploadProgress((p) => {
+          const copy = { ...p }
+          delete copy[file.id]
+          return copy
+        })
+      }, 700)
+
+      return url
     } catch (err: any) {
-      setUploadProgress(null)
+      setUploadProgress((p) => ({ ...p, [file.id]: 0 }))
+      console.error('uploadSingle error', err)
       throw err
-    } finally {
-      setTimeout(() => setUploadProgress(null), 1000)
     }
   }
 
-  async function onSubmit(data: FormValues) {
+  // form submit handler
+  async function onSubmit(formData: FormValues) {
     setError(null)
-    
-    // Check if user ID is available
+
     if (!userId) {
       setError('User authentication required. Please refresh the page.')
       return
     }
 
+    if (files.length === 0) {
+      setError('Please attach at least one image (up to 4).')
+      return
+    }
+
     try {
-      let imageUrl: string | null = null
-      if (imageFile) {
-        imageUrl = await uploadToImgBB(imageFile)
+      // upload sequentially for simpler progress tracking
+      const uploadedUrls: string[] = []
+      for (const f of files) {
+        setUploadProgress((p) => ({ ...p, [f.id]: 1 }))
+        const url = await uploadSingle(f)
+        uploadedUrls.push(url)
       }
 
-      // Convert price from string to number for API
-      const priceValue = parseFloat(data.price)
+      // Convert price to number
+      const priceValue = parseFloat(formData.price)
 
       const payload = {
-        title: data.title,
-        description: data.description,
+        title: formData.title,
+        description: formData.description,
         price: priceValue,
-        category: data.category,
-        images: imageUrl ? [imageUrl] : [],
-        userId: userId, // Include the user ID
+        category: formData.category,
+        images: uploadedUrls,
+        userId,
       }
-
-      console.log('Submitting payload:', payload)
 
       const res = await fetch('/api/products', {
         method: 'POST',
@@ -165,15 +235,13 @@ export default function CreateProductPage() {
         body: JSON.stringify(payload),
       })
 
-      const responseData = await res.json()
-
+      const body = await res.json()
       if (!res.ok) {
-        throw new Error(responseData.error || responseData.message || `Server returned ${res.status}`)
+        throw new Error(body?.error ?? body?.message ?? `Server error ${res.status}`)
       }
 
-      // success — navigate to listing
+      // success — navigate to dashboard list
       router.push('/dashboard/products')
-      router.refresh() // Refresh the router cache
     } catch (err: any) {
       console.error('Create product error', err)
       setError(err?.message ?? 'Failed to create product')
@@ -215,12 +283,7 @@ export default function CreateProductPage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Price *</label>
-            <Input 
-              type="number" 
-              step="0.01" 
-              min="0"
-              {...register('price')} 
-            />
+            <Input type="number" step="0.01" min="0" {...register('price')} />
             {errors.price && <p className="text-sm text-red-600 mt-1">{errors.price.message}</p>}
           </div>
 
@@ -232,32 +295,44 @@ export default function CreateProductPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Image</label>
-          <input 
-            type="file" 
-            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" 
-            onChange={onFileChange} 
+          <label className="block text-sm font-medium mb-1">Images (1–4)</label>
+          <input
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+            multiple
+            onChange={onFilesChange}
             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
-          <p className="text-xs text-gray-500 mt-1">Max file size: 5MB. Supported formats: JPEG, PNG, GIF, WebP</p>
-          
-          {uploadProgress !== null && (
-            <div className="mt-2">
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div 
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
-                  style={{ width: `${uploadProgress}%` }}
-                ></div>
+          <p className="text-xs text-gray-500 mt-1">Max 4 images. Max size per file: 5MB.</p>
+
+          {/* Previews */}
+          <div className="mt-3 flex gap-2 flex-wrap">
+            {files.map((f) => (
+              <div key={f.id} className="relative w-28 h-28 rounded overflow-hidden border">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={f.preview} alt={f.file.name} className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removeFile(f.id)}
+                  className="absolute top-1 right-1 bg-white/90 p-1 rounded text-sm"
+                >
+                  ✕
+                </button>
+
+                {/* small progress bar if uploading */}
+                {uploadProgress[f.id] !== undefined && (
+                  <div className="absolute left-0 bottom-0 w-full">
+                    <div className="w-full bg-gray-200 h-1">
+                      <div
+                        style={{ width: `${Math.min(uploadProgress[f.id] ?? 0, 100)}%` }}
+                        className="h-1 bg-blue-600 transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
-              <p className="text-xs text-gray-500 mt-1">Uploading... {uploadProgress}%</p>
-            </div>
-          )}
-          
-          {preview && (
-            <div className="mt-2">
-              <img src={preview} alt="preview" className="max-h-40 object-contain rounded border" />
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
         {error && (
@@ -267,18 +342,15 @@ export default function CreateProductPage() {
         )}
 
         <div className="flex justify-end gap-2">
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={() => router.push('/dashboard/products')}
+            disabled={isSubmitting}
           >
             Cancel
           </Button>
-          <Button 
-            type="submit" 
-            disabled={isSubmitting || !userId}
-            className="min-w-24"
-          >
+          <Button type="submit" disabled={isSubmitting || !userId} className="min-w-24">
             {isSubmitting ? 'Creating...' : 'Create Product'}
           </Button>
         </div>
