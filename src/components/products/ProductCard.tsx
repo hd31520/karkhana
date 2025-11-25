@@ -17,23 +17,39 @@ interface Product {
 export function ProductCard({ product }: { product: Product }) {
   const img = product.images && product.images[0] ? product.images[0] : '/images/banner.png'
   const slug = product.seo?.slug ?? product._id
+  
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
+    <div className="bg-card rounded-lg border border-border overflow-hidden hover:shadow-md transition-all duration-300 hover:border-primary/20">
       <Link href={`/products/${slug}`}>
-        <div className="h-48 w-full bg-gray-100 flex items-center justify-center overflow-hidden">
-          <img src={img} alt={product.title} className="object-cover w-full h-full" />
+        <div className="h-48 w-full bg-muted flex items-center justify-center overflow-hidden">
+          <img 
+            src={img} 
+            alt={product.title} 
+            className="object-cover w-full h-full transition-transform hover:scale-105 duration-300" 
+          />
         </div>
       </Link>
 
       <div className="p-4">
         <Link href={`/products/${slug}`}>
-          <h3 className="text-lg font-semibold line-clamp-2">{product.title}</h3>
+          <h3 className="text-lg font-semibold line-clamp-2 text-foreground hover:text-primary transition-colors">
+            {product.title}
+          </h3>
         </Link>
-        <p className="mt-2 text-sm text-gray-500">{product.category ?? 'Uncategorized'}</p>
+        
+        <p className="mt-2 text-sm text-muted-foreground">
+          {product.category ?? 'Uncategorized'}
+        </p>
+        
         <div className="mt-3 flex items-center justify-between">
-          <div className="text-xl font-bold">৳ {product.price?.toFixed ? product.price.toFixed(2) : product.price}</div>
+          <div className="text-xl font-bold text-foreground">
+            ৳ {product.price?.toFixed ? product.price.toFixed(2) : product.price}
+          </div>
+          
           <Link href={`/products/${slug}`}>
-            <button className="px-3 py-1 rounded-md border border-gray-200 text-sm hover:bg-gray-50">View</button>
+            <button className="px-3 py-1 rounded-md border border-border text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+              View
+            </button>
           </Link>
         </div>
       </div>

@@ -1,8 +1,8 @@
 // src/app/products/page.tsx
 import React from 'react'
 import { ProductGrid } from '@/components/products/ProductGrid'
-import { connectToDatabase } from '@/lib/database' // adjust if needed
-import { Product } from '@/models/Product'        // adjust if needed
+import { connectToDatabase } from '@/lib/database'
+import { Product } from '@/models/Product'
 
 type ProductType = {
   _id: string
@@ -67,18 +67,19 @@ export default async function ProductsPage() {
   const products: ProductType[] = await fetchProductsFromDb()
 
   return (
-    <main className="max-w-7xl mx-auto py-12 px-4">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold">Products</h1>
-        <p className="mt-2 text-gray-600">
-          সব প্রোডাক্ট ব্রাউজ করুন — ক্যাটাগরি ও অনুসন্ধানের জন্য উপরের বার ব্যবহার করুন।
-        </p>
-      </header>
+    <main className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto py-12 px-4">
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground">Products</h1>
+          <p className="mt-2 text-muted-foreground">
+            সব প্রোডাক্ট ব্রাউজ করুন — ক্যাটাগরি ও অনুসন্ধানের জন্য উপরের বার ব্যবহার করুন।
+          </p>
+        </header>
 
-      <section>
-        {/* ProductGrid is a client component and expects an array of products with numeric price */}
-        <ProductGrid products={products} />
-      </section>
+        <section>
+          <ProductGrid products={products} />
+        </section>
+      </div>
     </main>
   )
 }

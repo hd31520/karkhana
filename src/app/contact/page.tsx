@@ -18,7 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from "lucide-react";
-// import PublicLayout from "@/components/layout/public-layout";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -31,40 +30,40 @@ export default function Contact() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsSubmitting(true);
+    e.preventDefault();
+    setIsSubmitting(true);
 
-  try {
-    const res = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      console.error("Contact submit failed:", data);
-      toast?.error?.(data?.error || "Failed to send message.");
+      if (!res.ok) {
+        console.error("Contact submit failed:", data);
+        toast?.error?.(data?.error || "Failed to send message.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // success
       setIsSubmitting(false);
-      return;
+      setIsSubmitted(true);
+
+      // Reset form after a few seconds
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      }, 3000);
+    } catch (err) {
+      console.error("Contact submit error:", err);
+      setIsSubmitting(false);
+      toast?.error?.("Unexpected error while sending message.");
     }
-
-    // success
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-
-    // Reset form after a few seconds
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({ name: "", email: "", subject: "", message: "" });
-    }, 3000);
-  } catch (err) {
-    console.error("Contact submit error:", err);
-    setIsSubmitting(false);
-    toast?.error?.("Unexpected error while sending message.");
-  }
-};
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -76,64 +75,64 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      {/* <PublicLayout> */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <main className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto py-12 px-4">
+        {/* Hero Section */}
+        <section className="py-20">
           <div className="text-center">
-            <Badge variant="secondary" className="mb-4 px-4 py-1 text-sm">
+            <Badge variant="secondary" className="mb-4 px-4 py-1 text-sm bg-muted text-muted-foreground">
               Get In Touch
             </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
               We&apos;re Here to
-              <span className="text-blue-600"> Help</span>
+              <span className="text-primary"> Help</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
               Have questions about karkhana.shop? Need help with your account?
               Our team is here to help you succeed.
             </p>
           </div>
         </section>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <div className="pb-20">
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Contact Information */}
             <div className="lg:col-span-1 space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Contact Information</CardTitle>
+                  <CardTitle className="text-foreground">Contact Information</CardTitle>
                   <CardDescription>
                     Reach out to us through any of these channels
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Mail className="h-6 w-6 text-blue-600" />
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                      <Mail className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <div className="font-semibold">Email</div>
-                      <div className="text-gray-600">support@karkhana.shop</div>
+                      <div className="font-semibold text-foreground">Email</div>
+                      <div className="text-muted-foreground">support@karkhana.shop</div>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                      <Phone className="h-6 w-6 text-green-600" />
+                    <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                      <Phone className="h-6 w-6 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <div className="font-semibold">Phone</div>
-                      <div className="text-gray-600">+91 98765 43210</div>
+                      <div className="font-semibold text-foreground">Phone</div>
+                      <div className="text-muted-foreground">+91 98765 43210</div>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <MapPin className="h-6 w-6 text-purple-600" />
+                    <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                      <MapPin className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <div className="font-semibold">Office</div>
-                      <div className="text-gray-600">
+                      <div className="font-semibold text-foreground">Office</div>
+                      <div className="text-muted-foreground">
                         123 Business Park
                         <br />
                         Mumbai, Maharashtra 400001
@@ -142,12 +141,12 @@ export default function Contact() {
                   </div>
 
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                      <Clock className="h-6 w-6 text-orange-600" />
+                    <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                      <Clock className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                     </div>
                     <div>
-                      <div className="font-semibold">Hours</div>
-                      <div className="text-gray-600">
+                      <div className="font-semibold text-foreground">Hours</div>
+                      <div className="text-muted-foreground">
                         Mon - Fri: 9:00 AM - 6:00 PM
                         <br />
                         Support: 24/7
@@ -159,7 +158,7 @@ export default function Contact() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Quick Support</CardTitle>
+                  <CardTitle className="text-foreground">Quick Support</CardTitle>
                   <CardDescription>
                     Common questions answered instantly
                   </CardDescription>
@@ -167,28 +166,28 @@ export default function Contact() {
                 <CardContent className="space-y-3">
                   <Button
                     variant="outline"
-                    className="w-full justify-start"
+                    className="w-full justify-start border-border text-foreground hover:bg-accent"
                     asChild
                   >
                     <Link href="/help/account">Account & Billing</Link>
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full justify-start"
+                    className="w-full justify-start border-border text-foreground hover:bg-accent"
                     asChild
                   >
                     <Link href="/help/technical">Technical Issues</Link>
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full justify-start"
+                    className="w-full justify-start border-border text-foreground hover:bg-accent"
                     asChild
                   >
                     <Link href="/help/features">Feature Requests</Link>
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full justify-start"
+                    className="w-full justify-start border-border text-foreground hover:bg-accent"
                     asChild
                   >
                     <Link href="/help/partnership">Partnership</Link>
@@ -201,7 +200,7 @@ export default function Contact() {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Send us a Message</CardTitle>
+                  <CardTitle className="text-foreground">Send us a Message</CardTitle>
                   <CardDescription>
                     Fill out the form below and we&apos;ll get back to you
                     within 24 hours.
@@ -211,10 +210,10 @@ export default function Contact() {
                   {isSubmitted ? (
                     <div className="text-center py-8">
                       <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      <h3 className="text-xl font-semibold text-foreground mb-2">
                         Message Sent Successfully!
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-muted-foreground">
                         Thank you for reaching out. We&apos;ll get back to you
                         soon.
                       </p>
@@ -223,7 +222,7 @@ export default function Contact() {
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <Label htmlFor="name">Full Name</Label>
+                          <Label htmlFor="name" className="text-foreground">Full Name</Label>
                           <Input
                             id="name"
                             name="name"
@@ -234,7 +233,7 @@ export default function Contact() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="email">Email Address</Label>
+                          <Label htmlFor="email" className="text-foreground">Email Address</Label>
                           <Input
                             id="email"
                             name="email"
@@ -248,7 +247,7 @@ export default function Contact() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="subject">Subject</Label>
+                        <Label htmlFor="subject" className="text-foreground">Subject</Label>
                         <Input
                           id="subject"
                           name="subject"
@@ -260,7 +259,7 @@ export default function Contact() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="message">Message</Label>
+                        <Label htmlFor="message" className="text-foreground">Message</Label>
                         <Textarea
                           id="message"
                           name="message"
@@ -274,7 +273,7 @@ export default function Contact() {
 
                       <Button
                         type="submit"
-                        className="w-full bg-blue-600 hover:bg-blue-700"
+                        className="w-full bg-primary hover:bg-primary/90"
                         disabled={isSubmitting}
                       >
                         {isSubmitting ? (
@@ -296,8 +295,7 @@ export default function Contact() {
             </div>
           </div>
         </div>
-      {/* </PublicLayout> */}
-      {/* Hero Section */}
-    </div>
+      </div>
+    </main>
   );
 }

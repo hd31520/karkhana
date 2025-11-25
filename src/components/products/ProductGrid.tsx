@@ -16,7 +16,11 @@ interface Product {
 
 export function ProductGrid({ products }: { products: Product[] }) {
   if (!products || products.length === 0) {
-    return <div className="p-6 text-center text-gray-500">কোন প্রোডাক্ট পাওয়া যায়নি।</div>
+    return (
+      <div className="p-6 text-center text-muted-foreground">
+        কোন প্রোডাক্ট পাওয়া যায়নি।
+      </div>
+    )
   }
 
   return (
