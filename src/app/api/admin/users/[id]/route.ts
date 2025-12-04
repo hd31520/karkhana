@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { connectToDatabase } from '@/lib/database'
 import User from '@/models/User'
 
-const allowedRoles = ['admin', 'moderator', 'user'] as const
+const allowedRoles = ['admin', 'moderator', 'user', 'worker'] as const
 type Role = (typeof allowedRoles)[number]
 
 // Next.js validator এই ধরনের context expect করছে:

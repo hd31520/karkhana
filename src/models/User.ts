@@ -7,7 +7,7 @@ export interface IUser extends mongoose.Document {
   email: string;
   name: string;
   password: string;
-  role: 'admin' | 'moderator' | 'user';
+  role: 'admin' | 'moderator' | 'user' | 'worker';
   image?: string;
   emailVerified: boolean;
   emailVerificationToken?: string;
