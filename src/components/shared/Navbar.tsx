@@ -21,6 +21,7 @@ export default function Navbar() {
     { label: 'Featured', href: '/products/featured' },
     { label: 'Contact', href: '/contact' },
   ]
+  console.log(user)
 
   return (
     <header className="bg-white border-b sticky top-0 z-40 dark:bg-gray-900 dark:border-gray-700 transition-colors">
@@ -42,11 +43,10 @@ export default function Navbar() {
               <Link
                 key={n.href}
                 href={n.href}
-                className={`text-sm font-medium ${
-                  pathname === n.href
+                className={`text-sm font-medium ${pathname === n.href
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : 'text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400'
-                }`}
+                  }`}
               >
                 {n.label}
               </Link>
@@ -58,7 +58,7 @@ export default function Navbar() {
             <div className="hidden sm:flex items-center gap-3">
               {!loading && user ? (
                 <>
-                  <Link href={user.role === 'admin' ? '/admin/dashboard' : '/dashboard'}>
+                  <Link href={user.role === 'admin' ? '/admin' : '/dashboard'}>
                     <Button variant="ghost" size="sm">Dashboard</Button>
                   </Link>
 
@@ -168,11 +168,10 @@ export default function Navbar() {
                         key={n.href}
                         href={n.href}
                         onClick={() => setIsOpen(false)}
-                        className={`block text-base font-medium px-2 py-2 rounded-md ${
-                          pathname === n.href
+                        className={`block text-base font-medium px-2 py-2 rounded-md ${pathname === n.href
                             ? 'text-emerald-600 dark:text-emerald-400'
                             : 'text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400'
-                        }`}
+                          }`}
                       >
                         {n.label}
                       </Link>
