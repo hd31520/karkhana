@@ -19,16 +19,16 @@ const adminItems = [
 
 type AdminSidebarProps = {
   className?: string
+  onItemClick?: () => void // mobile এ ক্লিক করলে sidebar hide করার জন্য
 }
 
-export function AdminSidebar({ className }: AdminSidebarProps) {
+export function AdminSidebar({ className, onItemClick }: AdminSidebarProps) {
   const pathname = usePathname()
 
   return (
-    <aside
+    <div
       className={cn(
-        // mobile: full width, desktop: 72, border সব সময়ই থাকবে
-        'w-full md:w-72 border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950',
+        'h-full bg-white dark:bg-zinc-950 border-r border-gray-200 dark:border-zinc-800',
         className
       )}
     >
@@ -47,6 +47,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={onItemClick}
                 className={cn(
                   'block px-3 py-2 rounded-md text-sm transition-colors',
                   active
@@ -62,10 +63,12 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
 
         <div className="mt-6">
           <Button asChild variant="outline" size="sm" className="w-full">
-            <Link href="/dashboard">Go to Seller Dashboard</Link>
+            <Link href="/dashboard" onClick={onItemClick}>
+              Go to Seller Dashboard
+            </Link>
           </Button>
         </div>
       </div>
-    </aside>
+    </div>
   )
 }
