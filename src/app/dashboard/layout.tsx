@@ -1,29 +1,49 @@
-// src/app/dashboard/layout.tsx
 'use client'
 
-import React from 'react'
-import Link from 'next/link'
-import { Avatar } from '@/components/ui/avatar'
+import { useState, type ReactNode } from 'react'
 import { Sidebar } from '@/components/dashboard/Sidebar'
+import { Menu, X } from 'lucide-react'
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const [open, setOpen] = useState(false)
+
   return (
-    <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900">
-      <Sidebar />
-      <div className="flex-1 p-6">
-        <header className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Dashboard</h2>
-          <div className="flex items-center gap-4">
-            <nav className="hidden md:flex gap-4">
-              <Link href="/dashboard" className="text-sm text-zinc-600 dark:text-zinc-300">Overview</Link>
-              <Link href="/dashboard/products" className="text-sm text-zinc-600 dark:text-zinc-300">Products</Link>
-            </nav>
-            <Avatar className="w-9 h-9"/>
-          </div>
-        </header>
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      {/* Top bar */}
+      <header className="border-b bg-white dark:bg-zinc-900">
+        <div className="flex h-14 items-center justify-between px-4">
+          <button
+            className="md:hidden p-2 border rounded-md"
+            onClick={() => setOpen((p) => !p)}
+          >
+            {open ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
+          <span className="text-sm font-semibold">Seller Dashboard</span>
+        </div>
+      </header>
 
-        <main>{children}</main>
+      <div className="mx-auto flex max-w-6xl">
+        {/* Desktop sidebar */}
+        <div className="hidden md:block w-72">
+          <Sidebar />
+        </div>
+
+        {/* Main content */}
+        <main className="flex-1 p-4 md:p-6">{children}</main>
       </div>
+
+      {/* Mobile overlay sidebar */}
+      {open && (
+        <div className="fixed inset-0 z-40 md:hidden">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setOpen(false)}
+          />
+          <div className="relative h-full w-72 bg-white dark:bg-zinc-950">
+            <Sidebar onItemClick={() => setOpen(false)} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
