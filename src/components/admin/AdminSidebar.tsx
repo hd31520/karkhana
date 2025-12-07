@@ -17,11 +17,21 @@ const adminItems = [
   { href: '/admin/settings', label: 'Settings' },
 ]
 
-export function AdminSidebar() {
+type AdminSidebarProps = {
+  className?: string
+}
+
+export function AdminSidebar({ className }: AdminSidebarProps) {
   const pathname = usePathname()
 
   return (
-    <aside className="w-72 hidden md:block border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+    <aside
+      className={cn(
+        // mobile: full width, desktop: 72, border সব সময়ই থাকবে
+        'w-full md:w-72 border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950',
+        className
+      )}
+    >
       <div className="p-6">
         <h1 className="text-xl font-bold text-emerald-600">karkhana</h1>
         <p className="text-sm text-zinc-500 mt-1">Admin panel</p>
